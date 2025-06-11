@@ -1,60 +1,98 @@
-import pyshark
+from scapy.all import *
 import csv
 import sys
 from datetime import datetime
 
-if len(sys.argv) != 2:
-    print("Usage: python3 convert.py <input.pcap>")
-    sys.exit(1)
+def extract_info(pkt):
+    info = {
+        "Timestamp": "",
+        "MAC Src": "",
+        "MAC Dst": "",
+        "IP Version": "",
+        "Protocol": "",
+        "IP Src": "",
+        "Src Port": "",
+        "IP Dst": "",
+        "Dst Port": "",
+        "TTL": "",
+        "IP Header Len": "",
+        "TCP Flags": "",
+        "Window Size": "",
+        "ICMP Type": "",
+        "ICMP Code": "",
+        "Length": "",
+    }
 
-pcap_file = sys.argv[1]
-cap = pyshark.FileCapture(pcap_file, keep_packets=False)
+    info["Timestamp"] = datetime.fromtimestamp(float(pkt.time)).strftime("%Y-%m-%d %H:%M:%S")
+    info["Length"] = len(pkt)
 
-csv_file = pcap_file.replace(".pcap", ".csv")
+    if pkt.haslayer(Ether):
+        eth = pkt[Ether]
+        info["MAC Src"] = eth.src
+        info["MAC Dst"] = eth.dst
 
-with open(csv_file, mode='w', newline='') as f:
-    writer = csv.writer(f)
-    writer.writerow([
-        "Timestamp", "Source", "Destination", "Protocol", "Length",
-        "Src Port", "Dst Port", "TCP Flags", "TTL", "IP Header Length",
-        "Total IP Length", "Window Size", "ICMP Type", "ICMP Code"
-    ])
+    if pkt.haslayer(IP):
+        ip = pkt[IP]
+        info["IP Version"] = ip.version
+        info["IP Src"] = ip.src
+        info["IP Dst"] = ip.dst
+        info["TTL"] = ip.ttl
+        info["IP Header Len"] = ip.ihl * 4  # in bytes
 
-    for pkt in cap:
-        try:
-            timestamp = datetime.fromtimestamp(float(pkt.sniff_timestamp)).strftime("%Y-%m-%d %H:%M:%S")
-            src = pkt.ip.src
-            dst = pkt.ip.dst
-            proto = pkt.transport_layer or pkt.highest_layer
-            length = pkt.length
+        if pkt.haslayer(TCP):
+            tcp = pkt[TCP]
+            info["Protocol"] = "TCP"
+            info["Src Port"] = tcp.sport
+            info["Dst Port"] = tcp.dport
+            info["TCP Flags"] = tcp.sprintf("%TCP.flags%")
+            info["Window Size"] = tcp.window
 
-            # Defaults
-            src_port = dst_port = flags = ttl = ip_hlen = ip_len = win_size = icmp_type = icmp_code = ""
+        elif pkt.haslayer(UDP):
+            udp = pkt[UDP]
+            info["Protocol"] = "UDP"
+            info["Src Port"] = udp.sport
+            info["Dst Port"] = udp.dport
 
-            if "IP" in pkt:
-                ttl = pkt.ip.ttl
-                ip_len = pkt.ip.len
-                ip_hlen = pkt.ip.hdr_len
+        elif pkt.haslayer(ICMP):
+            icmp = pkt[ICMP]
+            info["Protocol"] = "ICMP"
+            info["ICMP Type"] = icmp.type
+            info["ICMP Code"] = icmp.code
 
-            if "TCP" in pkt:
-                src_port = pkt.tcp.srcport
-                dst_port = pkt.tcp.dstport
-                flags = pkt.tcp.flags
-                win_size = pkt.tcp.window_size
+        else:
+            info["Protocol"] = str(ip.proto)
 
-            elif "UDP" in pkt:
-                src_port = pkt.udp.srcport
-                dst_port = pkt.udp.dstport
+    return info
 
-            elif "ICMP" in pkt:
-                icmp_type = pkt.icmp.type
-                icmp_code = pkt.icmp.code
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python convert.py <file.pcap>")
+        sys.exit(1)
 
-            writer.writerow([
-                timestamp, src, dst, proto, length,
-                src_port, dst_port, flags, ttl, ip_hlen,
-                ip_len, win_size, icmp_type, icmp_code
-            ])
+    pcap_file = sys.argv[1]
+    csv_file = pcap_file.replace(".pcap", ".csv")
 
-        except AttributeError:
-            continue  # skip packets with missing attributes
+    packets = rdpcap(pcap_file)
+
+    fieldnames = [
+        "Timestamp", "MAC Src", "MAC Dst", "IP Version", "Protocol",
+        "IP Src", "Src Port", "IP Dst", "Dst Port", "TTL",
+        "IP Header Len", "TCP Flags", "Window Size",
+        "ICMP Type", "ICMP Code", "Length"
+    ]
+
+    with open(csv_file, 'w', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for pkt in packets:
+            try:
+                info = extract_info(pkt)
+                writer.writerow(info)
+            except Exception as e:
+                print(f"Skipping packet due to error: {e}")
+
+    print(f"[+] CSV file written: {csv_file}")
+
+if __name__ == "__main__":
+    main()
