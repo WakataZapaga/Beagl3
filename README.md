@@ -1,10 +1,10 @@
-# 🛡️ Beagl3
+# Beagl3
 
 A hybrid **network packet sniffer** and **feature extractor** built for **Linux systems**. This tool captures live network traffic using **C++ (libpcap)** and extracts useful features via **Python (Scapy)** into a structured `.csv` file for cybersecurity analysis, anomaly detection, or machine learning applications.
 
 ---
 
-## 🎯 Why I Built This
+## Why I Built This
 
 I created this project to strengthen my understanding of **network protocols**, **packet capture**, and **feature engineering** for cybersecurity. It allowed me to gain hands-on experience in:
 
@@ -15,9 +15,9 @@ I created this project to strengthen my understanding of **network protocols**, 
 
 ---
 
-## 📌 Features
+## Features
 
-### ✅ Real-Time Packet Sniffing (C++)
+### Real-Time Packet Sniffing (C++)
 - Captures live packets using `libpcap`
 - Saves packets to a `.pcap` file
 - Clean termination with `Ctrl+C` ensuring safe write
@@ -26,7 +26,7 @@ I created this project to strengthen my understanding of **network protocols**, 
   - Duration: `-t 30`
   - Filters: `-f "tcp or udp"`
 
-### ✅ Post-Capture Feature Extraction (Python)
+### Post-Capture Feature Extraction (Python)
 - Processes `.pcap` file using **Scapy**
 - Extracts:
   - Timestamps, IPs, MACs, Ports, TTL, Length
@@ -38,7 +38,7 @@ I created this project to strengthen my understanding of **network protocols**, 
 
 ---
 
-## ⚙️ How It Works
+## How It Works
 
 ### 1. Compile & Run the Sniffer (C++)
 
@@ -59,9 +59,9 @@ The output `.csv` will contain structured packet data for further use.
 
 ---
 
-## 🚀 How to Use This Tool
+## How to Use This Tool
 
-> 🐧 **Linux-only support**: This tool is developed, tested, and optimized for **Linux systems**. It uses `libpcap` for packet capture and Scapy for feature extraction—both of which are fully supported on Linux.
+> **Linux-only support**: This tool is developed, tested, and optimized for **Linux systems**. It uses `libpcap` for packet capture and Scapy for feature extraction—both of which are fully supported on Linux.
 
 ### Requirements:
 
@@ -88,16 +88,16 @@ pip install scapy
 
 ---
 
-## 🛑 Limitations
+## Limitations
 
-- 🔒 Requires root privileges (`sudo`) for capturing traffic.
-- 🐧 Linux-only due to dependence on `libpcap`.
-- ❌ No real-time classification or alerting (currently logging only).
-- 📊 Only extracts features observable from raw packet headers (no session-based metrics).
+- Requires root privileges (`sudo`) for capturing traffic.
+- Linux-only due to dependence on `libpcap`.
+- No real-time classification or alerting (currently logging only).
+- Only extracts features observable from raw packet headers (no session-based metrics).
 
 ---
 
-## ✅ Pros
+## Pros
 
 - Modular design: Separate capture and analysis stages
 - Feature-rich: Includes protocol, flags, service-based enrichment
@@ -106,7 +106,7 @@ pip install scapy
 
 ---
 
-## 🧠 Educational Benefits
+## Educational Benefits
 
 This project was a practical exercise in:
 
@@ -119,7 +119,7 @@ Perfect for students, beginners in network security, or anyone preparing for cyb
 
 ---
 
-## 🤝 Contributions Welcome
+## Contributions Welcome
 
 Want to add more protocol support? Real-time threat detection? Port it to BSD?  
 **Feel free to fork, suggest changes, or create a pull request.**  
@@ -127,7 +127,7 @@ All contributions are welcome and encouraged!
 
 ---
 
-## 📄 Output Example
+## Output Example
 
 A `.csv` file containing rows like:
 
@@ -140,7 +140,7 @@ service_http,service_ftp_data,service_private,...
 
 ---
 
-## 📡 Reach me
+## Reach me
   
 🔗 [LinkedIn](https://linkedin.com/in/debankan-mullick)
 🔗 [Instagram](https://instagram.com/senor_debankan)
